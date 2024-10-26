@@ -1,0 +1,637 @@
+<html><head><base href="." />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RicardoAhillonJr Meet - Free Video Conferencing</title>
+
+<style>
+:root {
+  --primary: #2962ff;
+  --secondary: #0039cb;
+  --success: #00c853;
+  --danger: #ff1744;
+  --dark: #263238;
+  --light: #f5f5f5;
+  --warning: #ffd600;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, var(--dark) 0%, #1a237e 100%);
+  min-height: 100vh;
+  color: var(--light);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  font-size: 2.5rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #2196f3, #00bcd4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.meeting-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3);
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: var(--dark);
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.video-container {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 1rem;
+  aspect-ratio: 16/9;
+  position: relative;
+}
+
+.video-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.controls {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  border-radius: 50px;
+  z-index: 1000;
+}
+
+.moderator-controls {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1rem;
+  border-radius: 10px;
+  z-index: 1000;
+}
+
+.control-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.control-btn.danger {
+  background: var(--danger);
+}
+
+.control-btn.danger:hover {
+  background: #d50000;
+}
+
+#roomInfo {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 10px;
+  margin: 1rem auto;
+  max-width: 600px;
+  text-align: center;
+  display: none;
+}
+
+.participant-controls {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.peer-name {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.moderator-badge {
+  background: var(--warning);
+  color: var(--dark);
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.chat-container {
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 300px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  display: none;
+  z-index: 1000;
+}
+
+.chat-header {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-messages {
+  height: 400px;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.chat-input {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-input input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.toast {
+  position: fixed;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  padding: 1rem 2rem;
+  border-radius: 25px;
+  display: none;
+  z-index: 2000;
+}
+
+</style>
+
+<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <header class="header">
+    <div class="logo">RicardoAhillonJr Meet</div>
+    <p>Free Video Conferencing - No Sign Up Required</p>
+  </header>
+
+  <div class="meeting-controls">
+    <button class="btn btn-primary" id="startMeeting">
+      <i class="fas fa-video"></i>
+      Start New Meeting
+    </button>
+    <button class="btn btn-primary" id="joinMeeting">
+      <i class="fas fa-sign-in-alt"></i>
+      Join Meeting
+    </button>
+  </div>
+
+  <div id="roomInfo"></div>
+  <div id="toast" class="toast"></div>
+  <div class="video-grid" id="videoGrid"></div>
+
+  <div class="controls">
+    <button class="control-btn" id="toggleMic" title="Toggle Microphone">
+      <i class="fas fa-microphone"></i>
+    </button>
+    <button class="control-btn" id="toggleVideo" title="Toggle Video">
+      <i class="fas fa-video"></i>
+    </button>
+    <button class="control-btn" id="toggleChat" title="Toggle Chat">
+      <i class="fas fa-comments"></i>
+    </button>
+    <button class="control-btn" id="shareScreen" title="Share Screen">
+      <i class="fas fa-desktop"></i>
+    </button>
+    <button class="control-btn danger" id="endCall" title="End Call">
+      <i class="fas fa-phone-slash"></i>
+    </button>
+  </div>
+
+  <div id="moderatorControls" class="moderator-controls" style="display: none;">
+    <h3>Moderator Controls</h3>
+    <button class="btn btn-warning" id="muteAll">
+      <i class="fas fa-microphone-slash"></i> Mute All
+    </button>
+    <button class="btn btn-warning" id="stopAllVideos">
+      <i class="fas fa-video-slash"></i> Stop All Videos
+    </button>
+    <button class="btn btn-danger" id="removeAll">
+      <i class="fas fa-user-times"></i> Remove All
+    </button>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <div class="chat-header">
+      <h3>Meeting Chat</h3>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Type a message...">
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  let peer;
+  let localStream;
+  let screenStream;
+  let peers = {};
+  let isModerator = false;
+  let roomId = null;
+  let userName = null;
+  const videoGrid = document.getElementById('videoGrid');
+  
+  // Initialize WebSocket connection
+  const socket = io('https://your-signaling-server.com');
+
+  async function initializePeer() {
+    peer = new Peer(undefined, {
+      host: 'your-peer-server.com',
+      port: 443,
+      secure: true,
+      config: {
+        'iceServers': [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+
+    peer.on('open', (id) => {
+      console.log('My peer ID is: ' + id);
+    });
+
+    peer.on('call', handleIncomingCall);
+  }
+
+  function showToast(message, duration = 3000) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    setTimeout(() => {
+      toast.style.display = 'none';
+    }, duration);
+  }
+
+  async function handleIncomingCall(call) {
+    call.answer(localStream);
+    const video = document.createElement('video');
+    call.on('stream', (remoteStream) => {
+      addVideoStream(video, remoteStream, call.peer);
+    });
+  }
+
+  function addVideoStream(video, stream, userId) {
+    const videoContainer = document.createElement('div');
+    videoContainer.className = 'video-container';
+    videoContainer.id = `user-${userId}`;
+    
+    video.srcObject = stream;
+    video.autoplay = true;
+    video.playsInline = true;
+    
+    const peerName = document.createElement('div');
+    peerName.className = 'peer-name';
+    peerName.textContent = userId === 'moderator' ? 'Moderator' : `Participant ${userId}`;
+    
+    if (isModerator && userId !== 'moderator') {
+      const participantControls = document.createElement('div');
+      participantControls.className = 'participant-controls';
+      
+      const muteBtn = document.createElement('button');
+      muteBtn.className = 'control-btn';
+      muteBtn.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+      muteBtn.onclick = () => muteParticipant(userId);
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'control-btn danger';
+      removeBtn.innerHTML = '<i class="fas fa-user-times"></i>';
+      removeBtn.onclick = () => removeParticipant(userId);
+      
+      participantControls.appendChild(muteBtn);
+      participantControls.appendChild(removeBtn);
+      videoContainer.appendChild(participantControls);
+    }
+    
+    videoContainer.appendChild(video);
+    videoContainer.appendChild(peerName);
+    videoGrid.appendChild(videoContainer);
+  }
+
+  async function startLocalStream() {
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+      const video = document.createElement('video');
+      addVideoStream(video, localStream, 'moderator');
+      return true;
+    } catch (err) {
+      showToast('Failed to access camera and microphone');
+      return false;
+    }
+  }
+
+  document.getElementById('startMeeting').addEventListener('click', async () => {
+    userName = prompt('Enter your name:');
+    if (!userName) return;
+
+    if (!peer) {
+      await initializePeer();
+    }
+    
+    const success = await startLocalStream();
+    if (success) {
+      isModerator = true;
+      roomId = Math.random().toString(36).substring(7);
+      document.getElementById('moderatorControls').style.display = 'block';
+      document.getElementById('roomInfo').style.display = 'block';
+      document.getElementById('roomInfo').innerHTML = `
+        Room ID: <strong>${roomId}</strong><br>
+        Share this ID with others to join the meeting.
+      `;
+      
+      socket.emit('create-room', { roomId, moderator: peer.id });
+      showToast('You are now the moderator of this meeting');
+    }
+  });
+
+  document.getElementById('joinMeeting').addEventListener('click', async () => {
+    userName = prompt('Enter your name:');
+    if (!userName) return;
+
+    const meetingId = prompt('Enter the Room ID to join:');
+    if (!meetingId) return;
+
+    if (!peer) {
+      await initializePeer();
+    }
+
+    if (!localStream) {
+      const success = await startLocalStream();
+      if (!success) return;
+    }
+
+    socket.emit('join-room', { roomId: meetingId, userId: peer.id, userName });
+  });
+
+  // Moderator Controls
+  document.getElementById('muteAll').addEventListener('click', () => {
+    if (isModerator) {
+      socket.emit('mute-all', { roomId });
+      showToast('All participants muted');
+    }
+  });
+
+  document.getElementById('stopAllVideos').addEventListener('click', () => {
+    if (isModerator) {
+      socket.emit('stop-all-videos', { roomId });
+      showToast('All participant videos stopped');
+    }
+  });
+
+  document.getElementById('removeAll').addEventListener('click', () => {
+    if (isModerator && confirm('Are you sure you want to remove all participants?')) {
+      socket.emit('remove-all', { roomId });
+      showToast('All participants removed');
+    }
+  });
+
+  // Chat functionality
+  const chatToggle = document.getElementById('toggleChat');
+  const chatContainer = document.getElementById('chatContainer');
+  const chatInput = document.getElementById('chatInput');
+
+  chatToggle.addEventListener('click', () => {
+    chatContainer.style.display = chatContainer.style.display === 'none' ? 'block' : 'none';
+  });
+
+  chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && chatInput.value.trim()) {
+      socket.emit('chat-message', {
+        roomId,
+        message: chatInput.value,
+        sender: userName
+      });
+      chatInput.value = '';
+    }
+  });
+
+  // Screen sharing
+  document.getElementById('shareScreen').addEventListener('click', async () => {
+    try {
+      if (!screenStream) {
+        screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: true
+        });
+        const video = document.createElement('video');
+        addVideoStream(video, screenStream, 'screen-share');
+        screenStream.getVideoTracks()[0].onended = () => {
+          stopScreenShare();
+        };
+        showToast('Screen sharing started');
+      } else {
+        stopScreenShare();
+      }
+    } catch (err) {
+      showToast('Failed to start screen sharing');
+    }
+  });
+
+  function stopScreenShare() {
+    if (screenStream) {
+      screenStream.getTracks().forEach(track => track.stop());
+      screenStream = null;
+      const screenVideo = document.getElementById('user-screen-share');
+      if (screenVideo) screenVideo.remove();
+      showToast('Screen sharing stopped');
+    }
+  }
+
+  // Handle basic controls
+  const toggleMicBtn = document.getElementById('toggleMic');
+  const toggleVideoBtn = document.getElementById('toggleVideo');
+  const endCallBtn = document.getElementById('endCall');
+
+  let isAudioEnabled = true;
+  let isVideoEnabled = true;
+
+  toggleMicBtn.addEventListener('click', () => {
+    if (localStream) {
+      isAudioEnabled = !isAudioEnabled;
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = isAudioEnabled;
+      });
+      toggleMicBtn.innerHTML = isAudioEnabled ? 
+        '<i class="fas fa-microphone"></i>' : 
+        '<i class="fas fa-microphone-slash"></i>';
+      showToast(`Microphone ${isAudioEnabled ? 'unmuted' : 'muted'}`);
+    }
+  });
+
+  toggleVideoBtn.addEventListener('click', () => {
+    if (localStream) {
+      isVideoEnabled = !isVideoEnabled;
+      localStream.getVideoTracks().forEach(track => {
+        track.enabled = isVideoEnabled;
+      });
+      toggleVideoBtn.innerHTML = isVideoEnabled ? 
+        '<i class="fas fa-video"></i>' : 
+        '<i class="fas fa-video-slash"></i>';
+      showToast(`Camera ${isVideoEnabled ? 'started' : 'stopped'}`);
+    }
+  });
+
+  endCallBtn.addEventListener('click', () => {
+    if (confirm('Are you sure you want to leave the meeting?')) {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      if (screenStream) {
+        stopScreenShare();
+      }
+      if (peer) {
+        peer.destroy();
+      }
+      socket.emit('leave-room', { roomId, userId: peer.id });
+      window.location.reload();
+    }
+  });
+
+  // Handle user leaving
+  window.onbeforeunload = () => {
+    if (peer) {
+      peer.destroy();
+    }
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+    }
+    if (screenStream) {
+      stopScreenShare();
+    }
+    socket.emit('leave-room', { roomId, userId: peer.id });
+  };
+
+  // Socket event handlers
+  socket.on('participant-joined', ({ userId, userName }) => {
+    showToast(`${userName} joined the meeting`);
+  });
+
+  socket.on('participant-left', ({ userId, userName }) => {
+    showToast(`${userName} left the meeting`);
+    const videoElement = document.getElementById(`user-${userId}`);
+    if (videoElement) videoElement.remove();
+  });
+
+  socket.on('chat-message-received', ({ sender, message }) => {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageElement = document.createElement('div');
+    messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  socket.on('participant-muted', ({ userId }) => {
+    // Handle participant muted event
+    showToast('You have been muted by the moderator');
+  });
+
+  socket.on('participant-removed', ({ userId }) => {
+    if (userId === peer.id) {
+      showToast('You have been removed from the meeting');
+      window.location.reload();
+    }
+  });
+});
+</script>
+
+</body></html>
